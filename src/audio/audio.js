@@ -363,7 +363,7 @@ function stopMusic(fadeTime = 0.3) {
 // ---------------------------------------------------------------------------
 export function createAudio(events) {
   // Wire SFX
-  events.on(EVT.SFX, ({ id }) => playSfx(id));
+  events.on(EVT.SFX, (p) => playSfx(typeof p === 'string' ? p : p?.id));
 
   // Wire room changes → music
   events.on(EVT.ROOM_CHANGED, ({ room }) => {

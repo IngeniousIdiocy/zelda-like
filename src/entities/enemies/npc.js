@@ -26,14 +26,23 @@ export function createOldMan(events, state, opts = {}) {
   // NPC does not take damage
   e.takeDamage = function() {};
 
+  e._reopenCooldown = 0;
+  e._wasOverlapping = false;
+
   e.update = function update(dt, world) {
-    if (e.dead || e.dialogOpen) return;
+    if (e.dead) return;
+    if (e._reopenCooldown > 0) e._reopenCooldown -= dt;
+    if (e.dialogOpen) return;
 
     const player = world.player;
     if (!player) return;
 
-    // Trigger on AABB overlap (proximity trigger)
-    if (aabb(e, player)) {
+    const overlapping = aabb(e, player);
+    // Re-trigger only on a fresh edge (player was not overlapping last frame).
+    const edgeIn = overlapping && !e._wasOverlapping && e._reopenCooldown <= 0;
+    e._wasOverlapping = overlapping;
+
+    if (edgeIn) {
       e.dialogOpen = true;
 
       const alreadyGot = state.flags && state.flags.has('got_sword');
@@ -43,10 +52,11 @@ export function createOldMan(events, state, opts = {}) {
         text,
         onClose: () => {
           e.dialogOpen = false;
+          e._reopenCooldown = 0.8;
           if (!alreadyGot) {
             state.hasSword = true;
             if (state.flags) state.flags.add('got_sword');
-            events.emit(EVT.SFX, { key: 'item_get' });
+            events.emit(EVT.SFX, { id: 'item_get' });
           }
         },
       });

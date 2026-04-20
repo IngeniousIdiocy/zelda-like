@@ -291,7 +291,7 @@ export const dungeon1 = [
 export const caveRooms = [
   makeRoom('cave_oldman', DNG, cave_oldman_tiles,
     {},
-    [{ x: 7, y: 7, toRoom: 'ov_2_2', toX: 2*16, toY: 7*16 }],
+    [{ x: 7, y: 9, toRoom: 'ov_2_2', toX: 2*16, toY: 8*16 }],
     [
       { x: 7*16, y: 4*16, kind: 'npc_oldman', opts: { dialog: TEXT_OLDMAN_DIALOG, gives: 'sword' } },
     ], DNG),
