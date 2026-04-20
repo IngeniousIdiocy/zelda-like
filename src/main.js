@@ -222,24 +222,27 @@ events.on('PLAYER_USE_ITEM',    (p) => events.emit('player_use_item', p));
 // Edge-of-screen room transitions.
 // When the player walks off one edge of a room, enter the neighbour room.
 // ---------------------------------------------------------------------------
-// Edge-transition: player clamps itself to the room, so we trigger on
-// "hugging edge + pushing further in that direction" with a neighbor room.
+// Edge-transition: player's movement stops when rectSolid returns true for
+// the next step — and off-map counts as solid, so the player gets stuck a
+// few pixels shy of x==0 / x+w==SCREEN_W. Trigger transition whenever the
+// player is within one tile of the edge AND pushing further.
+const EDGE_TOL = 4;
 function checkEdgeTransition() {
   const p = world.player;
   if (!p || p.dead || !world.room) return;
   const r = world.room;
   const s = input.state;
-  if (s.left  && p.x <= 0                  && r.west)  return world.enterRoom(r.west,  'e');
-  if (s.right && p.x + p.w >= SCREEN_W     && r.east)  return world.enterRoom(r.east,  'w');
-  if (s.up    && p.y <= 0                  && r.north) return world.enterRoom(r.north, 's');
-  if (s.down  && p.y + p.h >= SCREEN_H     && r.south) return world.enterRoom(r.south, 'n');
+  if (s.left  && p.x               <= EDGE_TOL            && r.west)  return world.enterRoom(r.west,  'e');
+  if (s.right && p.x + p.w         >= SCREEN_W - EDGE_TOL && r.east)  return world.enterRoom(r.east,  'w');
+  if (s.up    && p.y               <= EDGE_TOL            && r.north) return world.enterRoom(r.north, 's');
+  if (s.down  && p.y + p.h         >= SCREEN_H - EDGE_TOL && r.south) return world.enterRoom(r.south, 'n');
 }
 
 // ---------------------------------------------------------------------------
 // Room visited tracking (used by HUD mini-map).
 // ---------------------------------------------------------------------------
-events.on(EVT.ROOM_CHANGED, ({ room }) => {
-  state.flags.add('visited_' + room.id);
+events.on(EVT.ROOM_CHANGED, (p) => {
+  if (p && p.room && p.room.id) state.flags.add('visited_' + p.room.id);
 });
 
 // Gameover: ui emits EVT.ROOM_CHANGED on continue (per agent contract).
