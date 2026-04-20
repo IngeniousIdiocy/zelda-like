@@ -79,8 +79,8 @@ export function createPlayer(events, state, opts = {}) {
   const self = {
     id,
     kind: 'player',
-    get x() { return x; },
-    get y() { return y; },
+    get x() { return x; }, set x(v) { x = v; },
+    get y() { return y; }, set y(v) { y = v; },
     w: HITBOX_W,
     h: HITBOX_H,
     get hp()    { return state.hearts; },

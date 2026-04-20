@@ -391,7 +391,7 @@ export const overworld = [
   // START ROOM — no enemies, has sign and cave
   makeRoom('ov_2_2', OV, ov_2_2_tiles,
     { north: 'ov_1_2', south: 'ov_3_2', west: 'ov_2_1', east: 'ov_2_3' },
-    [{ x: 2, y: 7, toRoom: 'cave_oldman', toX: 7, toY: 7 }],
+    [{ x: 2, y: 7, toRoom: 'cave_oldman', toX: 7*16, toY: 8*16 }],
     [
       { x: 8*16, y: 4*16, kind: 'sign', opts: { text: TEXT_SIGN_START } },
     ], 'overworld'),

@@ -137,19 +137,29 @@ export function createWorld({ events, state, player }) {
       // Remove dead entities.
       world.entities = world.entities.filter(e => !e.dead);
 
-      // Check warps under player foot-center.
+      // Check warps under player foot-center. Suppress re-triggering the
+      // just-used warp until the player has stepped off that tile.
       if (player && !player.dead && world.room.warps) {
         const footX = player.x + player.w / 2;
         const footY = player.y + player.h;
         const tx = Math.floor(footX / TILE);
         const ty = Math.floor(footY / TILE);
-        for (const warp of world.room.warps) {
-          if (warp.x === tx && warp.y === ty) {
-            // Move player to warp target before entering room.
-            if (warp.toX !== undefined) player.x = warp.toX;
-            if (warp.toY !== undefined) player.y = warp.toY;
-            world.enterRoom(warp.toRoom);
-            break;
+        if (world._suppressWarp && (world._suppressWarp.tx !== tx || world._suppressWarp.ty !== ty)) {
+          world._suppressWarp = null;
+        }
+        if (!world._suppressWarp) {
+          for (const warp of world.room.warps) {
+            if (warp.x === tx && warp.y === ty) {
+              if (warp.toX !== undefined) player.x = warp.toX;
+              if (warp.toY !== undefined) player.y = warp.toY;
+              world.enterRoom(warp.toRoom);
+              // Mark the destination's landing tile as suppressed so we don't
+              // immediately warp back.
+              const lx = Math.floor((player.x + player.w / 2) / TILE);
+              const ly = Math.floor((player.y + player.h) / TILE);
+              world._suppressWarp = { tx: lx, ty: ly };
+              break;
+            }
           }
         }
       }
